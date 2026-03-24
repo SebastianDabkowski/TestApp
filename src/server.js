@@ -41,10 +41,6 @@ function createApp() {
   app.use(rateLimit({ windowMs: 60000, maxRequests: 60 }));
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
-
   app.post('/api/parse', (req, res) => {
     const { documentation } = req.body;
 
