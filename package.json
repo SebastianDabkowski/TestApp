@@ -1,0 +1,31 @@
+{
+  "name": "testapp",
+  "version": "1.0.0",
+  "description": "AI-powered testing application that uses Playwright to test web applications based on URL and documentation",
+  "main": "src/index.js",
+  "bin": {
+    "testapp": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "lint": "eslint src/ tests/"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "ai",
+    "automation",
+    "web-testing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "openai": "^4.77.0",
+    "playwright": "^1.58.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
