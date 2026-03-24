@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TestApp - AI-Powered Web Testing</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      min-height: 100vh;
+    }
+    .header {
+      background: #1a1a2e;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+    }
+    .header h1 { font-size: 1.8em; margin-bottom: 4px; }
+    .header p { color: #a0a0c0; font-size: 0.95em; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 1.15em;
+      margin-bottom: 16px;
+      color: #1a1a2e;
+      border-bottom: 2px solid #f0f2f5;
+      padding-bottom: 8px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95em;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #4361ee;
+      box-shadow: 0 0 0 3px rgba(67,97,238,0.1);
+    }
+    .form-group textarea { resize: vertical; min-height: 180px; font-family: monospace; font-size: 0.85em; }
+    .form-row { display: flex; gap: 16px; }
+    .form-row .form-group { flex: 1; }
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: #4361ee; color: white; }
+    .btn-primary:hover { background: #3a56d4; }
+    .btn-primary:disabled { background: #a0b0e0; cursor: not-allowed; }
+    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-secondary:hover { background: #d0d0d0; }
+    .actions { display: flex; gap: 12px; align-items: center; }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ddd;
+      border-top-color: #4361ee;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-msg { font-size: 0.9em; color: #666; margin-left: 8px; }
+    .error-msg { color: #dc2626; background: #fef2f2; padding: 12px; border-radius: 6px; font-size: 0.9em; margin-bottom: 16px; }
+    .hidden { display: none; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .summary-item {
+      text-align: center;
+      padding: 16px;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
+    .summary-item .value { font-size: 2em; font-weight: 700; }
+    .summary-item .label { font-size: 0.8em; color: #666; margin-top: 4px; }
+    .summary-item.passed .value { color: #22c55e; }
+    .summary-item.failed .value { color: #ef4444; }
+    .results-table { width: 100%; border-collapse: collapse; }
+    .results-table th,
+    .results-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9em; }
+    .results-table th { background: #1a1a2e; color: white; font-weight: 600; }
+    .results-table tr:hover { background: #f8f9fa; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 0.8em;
+      font-weight: 600;
+    }
+    .badge-passed { background: #dcfce7; color: #166534; }
+    .badge-failed { background: #fee2e2; color: #991b1b; }
+    .badge-skipped { background: #fef3c7; color: #92400e; }
+    .scenarios-list { margin-top: 12px; }
+    .scenario-item {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .scenario-item h4 { font-size: 0.95em; margin-bottom: 4px; }
+    .scenario-item p { font-size: 0.85em; color: #666; margin-bottom: 6px; }
+    .step-list { font-size: 0.8em; color: #555; padding-left: 18px; }
+    .step-list li { margin-bottom: 2px; }
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; gap: 0; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>TestApp</h1>
+    <p>AI-Powered Web Application Testing with Playwright</p>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Configuration</h2>
+      <div class="form-group">
+        <label for="targetUrl">Target URL</label>
+        <input type="url" id="targetUrl" placeholder="https://example.com" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="apiKey">OpenAI API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-..." />
+        </div>
+        <div class="form-group">
+          <label for="timeout">Timeout (ms)</label>
+          <input type="number" id="timeout" value="30000" min="1000" step="1000" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="documentation">Application Documentation (Markdown)</label>
+        <textarea id="documentation" placeholder="# My Application&#10;&#10;## Overview&#10;Describe your application here...&#10;&#10;## Pages&#10;- Home page at /&#10;- Login page at /login"></textarea>
+      </div>
+      <div class="actions">
+        <button id="runBtn" class="btn btn-primary">Run Tests</button>
+        <button id="parseBtn" class="btn btn-secondary">Parse Only</button>
+        <div id="loadingIndicator" class="hidden">
+          <span class="spinner"></span>
+          <span id="statusMsg" class="status-msg">Starting...</span>
+        </div>
+      </div>
+      <div id="errorMsg" class="error-msg hidden"></div>
+    </div>
+
+    <div id="scenariosSection" class="card hidden">
+      <h2>Generated Test Scenarios</h2>
+      <div id="scenariosList" class="scenarios-list"></div>
+    </div>
+
+    <div id="resultsSection" class="card hidden">
+      <h2>Test Results</h2>
+      <div id="summaryGrid" class="summary-grid"></div>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Test Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Duration</th>
+            <th>Error</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const runBtn = $('#runBtn');
+    const parseBtn = $('#parseBtn');
+    const loadingIndicator = $('#loadingIndicator');
+    const statusMsg = $('#statusMsg');
+    const errorMsg = $('#errorMsg');
+    const scenariosSection = $('#scenariosSection');
+    const scenariosList = $('#scenariosList');
+    const resultsSection = $('#resultsSection');
+    const summaryGrid = $('#summaryGrid');
+    const resultsBody = $('#resultsBody');
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.remove('hidden');
+    }
+
+    function hideError() {
+      errorMsg.classList.add('hidden');
+    }
+
+    function setLoading(loading, message) {
+      if (loading) {
+        loadingIndicator.classList.remove('hidden');
+        statusMsg.textContent = message || 'Processing...';
+        runBtn.disabled = true;
+        parseBtn.disabled = true;
+      } else {
+        loadingIndicator.classList.add('hidden');
+        runBtn.disabled = false;
+        parseBtn.disabled = false;
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderScenarios(scenarios) {
+      scenariosList.innerHTML = '';
+      for (const scenario of scenarios) {
+        const steps = scenario.steps
+          .map((s) => '<li><strong>' + escapeHtml(s.action) + '</strong>' +
+            (s.selector ? ' on <code>' + escapeHtml(s.selector) + '</code>' : '') +
+            (s.value ? ' → ' + escapeHtml(String(s.value)) : '') + '</li>')
+          .join('');
+        const item = document.createElement('div');
+        item.className = 'scenario-item';
+        item.innerHTML =
+          '<h4>' + escapeHtml(scenario.name) + '</h4>' +
+          '<p>' + escapeHtml(scenario.description || '') + '</p>' +
+          '<ol class="step-list">' + steps + '</ol>';
+        scenariosList.appendChild(item);
+      }
+      scenariosSection.classList.remove('hidden');
+    }
+
+    function renderResults(report) {
+      const s = report.summary;
+      summaryGrid.innerHTML =
+        '<div class="summary-item"><div class="value">' + s.total + '</div><div class="label">Total</div></div>' +
+        '<div class="summary-item passed"><div class="value">' + s.passed + '</div><div class="label">Passed</div></div>' +
+        '<div class="summary-item failed"><div class="value">' + s.failed + '</div><div class="label">Failed</div></div>' +
+        '<div class="summary-item"><div class="value">' + s.passRate + '%</div><div class="label">Pass Rate</div></div>';
+
+      resultsBody.innerHTML = '';
+      for (const test of report.tests) {
+        const row = document.createElement('tr');
+        row.innerHTML =
+          '<td>' + escapeHtml(test.name) + '</td>' +
+          '<td>' + escapeHtml(test.description || '') + '</td>' +
+          '<td><span class="badge badge-' + test.status + '">' + test.status + '</span></td>' +
+          '<td>' + test.duration + 'ms</td>' +
+          '<td>' + (test.error ? escapeHtml(test.error) : '-') + '</td>';
+        resultsBody.appendChild(row);
+      }
+      resultsSection.classList.remove('hidden');
+    }
+
+    function getFormValues() {
+      return {
+        url: $('#targetUrl').value.trim(),
+        apiKey: $('#apiKey').value.trim(),
+        documentation: $('#documentation').value,
+        timeout: $('#timeout').value,
+      };
+    }
+
+    function validate(values, needsUrl) {
+      if (needsUrl && !values.url) {
+        showError('Target URL is required.');
+        return false;
+      }
+      if (!values.documentation) {
+        showError('Documentation is required.');
+        return false;
+      }
+      return true;
+    }
+
+    parseBtn.addEventListener('click', async () => {
+      hideError();
+      const values = getFormValues();
+      if (!validate(values, false)) return;
+
+      setLoading(true, 'Parsing documentation...');
+      try {
+        const resp = await fetch('/api/parse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentation: values.documentation }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) { showError(data.error || 'Parse failed'); return; }
+
+        resultsSection.classList.add('hidden');
+        scenariosList.innerHTML =
+          '<div class="scenario-item"><h4>Parsed: ' + escapeHtml(data.title || 'Untitled') + '</h4>' +
+          '<p>' + data.sections.length + ' section(s) found</p>' +
+          '<ol class="step-list">' +
+          data.sections.map((s) => '<li>' + escapeHtml(s.heading) + ' (h' + s.level + ')</li>').join('') +
+          '</ol></div>';
+        scenariosSection.classList.remove('hidden');
+      } catch (err) {
+        showError('Network error: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    runBtn.addEventListener('click', async () => {
+      hideError();
+      scenariosSection.classList.add('hidden');
+      resultsSection.classList.add('hidden');
+
+      const values = getFormValues();
+      if (!validate(values, true)) return;
+
+      setLoading(true, 'Generating test scenarios with AI...');
+      try {
+        const resp = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: values.url,
+            documentation: values.documentation,
+            apiKey: values.apiKey,
+            options: { timeout: values.timeout },
+          }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) { showError(data.error || 'Test run failed'); return; }
+
+        if (data.scenarios) renderScenarios(data.scenarios);
+        if (data.report) renderResults(data.report);
+      } catch (err) {
+        showError('Network error: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>

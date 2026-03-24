@@ -34,6 +34,23 @@ npx playwright install
 
 ## Quick Start
 
+### Web Interface
+
+```bash
+# Set your OpenAI API key
+export OPENAI_API_KEY=your-api-key-here
+
+# Start the web server
+npm run serve
+```
+
+Open **http://localhost:3000** in your browser. The web UI lets you:
+- Enter a target URL and paste documentation
+- Parse documentation to preview detected sections
+- Run the full test pipeline and view results with pass/fail status
+
+### CLI
+
 ```bash
 # Set your OpenAI API key
 export OPENAI_API_KEY=your-api-key-here
@@ -94,6 +111,9 @@ TestApp generates two report files in the output directory:
 TestApp/
 ├── src/
 │   ├── index.js            # CLI entry point
+│   ├── server.js           # Express web server
+│   ├── public/
+│   │   └── index.html      # Web UI frontend
 │   ├── docParser.js         # Markdown documentation parser
 │   ├── testGenerator.js     # AI-powered test scenario generator
 │   ├── testRunner.js        # Playwright test executor
