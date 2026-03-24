@@ -75,9 +75,10 @@ function createApp() {
     try {
       const parsed = parseMarkdownContent(documentation);
       const scenarios = await generateTestScenarios(parsed, key);
+      const timeout = parseInt(options.timeout, 10);
       const results = await runTests(url, scenarios, {
         headed: options.headed || false,
-        timeout: parseInt(options.timeout, 10) || 30000,
+        timeout: (Number.isFinite(timeout) && timeout > 0) ? timeout : 30000,
       });
       const reportData = buildReportData(results, url);
       const htmlReport = buildHtmlReport(reportData);

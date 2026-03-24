@@ -99,14 +99,16 @@ describe('server', () => {
       const originalKey = process.env.OPENAI_API_KEY;
       delete process.env.OPENAI_API_KEY;
 
-      const res = await request('POST', '/api/generate', {
-        documentation: '# App\n\n## Page\n\nSome content.',
-      });
+      try {
+        const res = await request('POST', '/api/generate', {
+          documentation: '# App\n\n## Page\n\nSome content.',
+        });
 
-      expect(res.status).toBe(400);
-      expect(res.body.error).toContain('API key is required');
-
-      if (originalKey) process.env.OPENAI_API_KEY = originalKey;
+        expect(res.status).toBe(400);
+        expect(res.body.error).toContain('API key is required');
+      } finally {
+        if (originalKey !== undefined) process.env.OPENAI_API_KEY = originalKey;
+      }
     });
 
     test('returns 400 when documentation is missing', async () => {
@@ -144,15 +146,17 @@ describe('server', () => {
       const originalKey = process.env.OPENAI_API_KEY;
       delete process.env.OPENAI_API_KEY;
 
-      const res = await request('POST', '/api/run', {
-        url: 'https://example.com',
-        documentation: '# App',
-      });
+      try {
+        const res = await request('POST', '/api/run', {
+          url: 'https://example.com',
+          documentation: '# App',
+        });
 
-      expect(res.status).toBe(400);
-      expect(res.body.error).toContain('API key is required');
-
-      if (originalKey) process.env.OPENAI_API_KEY = originalKey;
+        expect(res.status).toBe(400);
+        expect(res.body.error).toContain('API key is required');
+      } finally {
+        if (originalKey !== undefined) process.env.OPENAI_API_KEY = originalKey;
+      }
     });
   });
 });
