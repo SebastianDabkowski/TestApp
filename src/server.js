@@ -6,6 +6,30 @@ const { runTests } = require('./testRunner');
 const { buildReportData, buildHtmlReport } = require('./reportGenerator');
 
 /**
+ * Simple in-memory rate limiter middleware.
+ *
+ * @param {{ windowMs: number, maxRequests: number }} options
+ * @returns {import('express').RequestHandler}
+ */
+function rateLimit({ windowMs = 60000, maxRequests = 30 } = {}) {
+  const hits = new Map();
+
+  const interval = setInterval(() => hits.clear(), windowMs);
+  interval.unref();
+
+  return (req, res, next) => {
+    const key = req.ip;
+    const count = (hits.get(key) || 0) + 1;
+    hits.set(key, count);
+
+    if (count > maxRequests) {
+      return res.status(429).json({ error: 'Too many requests, please try again later' });
+    }
+    return next();
+  };
+}
+
+/**
  * Creates and configures the Express application.
  *
  * @returns {import('express').Express}
@@ -14,6 +38,7 @@ function createApp() {
   const app = express();
 
   app.use(express.json({ limit: '1mb' }));
+  app.use(rateLimit({ windowMs: 60000, maxRequests: 60 }));
   app.use(express.static(path.join(__dirname, 'public')));
 
   app.get('/', (req, res) => {
